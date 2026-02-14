@@ -1,0 +1,64 @@
+{
+  "buildCommand" : {
+    "command" : "build",
+    "skipDependencies" : false,
+    "style" : "buildOnly"
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "a64c72e49b497cd8e37f38944e47d11939a4c9d0bf06ff50f0547e9999efc1ce"
+    }
+  ],
+  "containerPath" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/LiquidWindow.xcodeproj",
+  "continueBuildingAfterErrors" : false,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "build",
+    "activeArchitecture" : "arm64",
+    "activeRunDestination" : {
+      "disableOnlyActiveArch" : false,
+      "platform" : "macosx",
+      "sdk" : "macosx26.0",
+      "sdkVariant" : "macos",
+      "supportedArchitectures" : [
+        "arm64e",
+        "arm64",
+        "x86_64"
+      ],
+      "targetArchitecture" : "arm64"
+    },
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex",
+      "buildProductsPath" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Products",
+      "derivedDataPath" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build",
+      "indexDataStoreFolderPath" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Index.noindex/PrecompiledHeaders",
+      "pchPath" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/PrecompiledHeaders"
+    },
+    "configurationName" : "Release",
+    "overrides" : {
+      "commandLine" : {
+        "table" : {
+
+        }
+      },
+      "synthesized" : {
+        "table" : {
+          "ACTION" : "build",
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_XOJIT_PREVIEWS" : "YES",
+          "ONLY_ACTIVE_ARCH" : "YES"
+        }
+      }
+    }
+  },
+  "schemeCommand" : "launch",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : false,
+  "useImplicitDependencies" : true,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : true
+}

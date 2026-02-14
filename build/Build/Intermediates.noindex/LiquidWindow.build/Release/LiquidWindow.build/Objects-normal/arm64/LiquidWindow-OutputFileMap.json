@@ -1,0 +1,36 @@
+{
+  "" : {
+    "const-values" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/LiquidWindow-master.swiftconstvalues",
+    "dependencies" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/LiquidWindow-master.d",
+    "diagnostics" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/LiquidWindow-master.dia",
+    "emit-module-dependencies" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/LiquidWindow-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/LiquidWindow-master-emit-module.dia",
+    "pch" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/LiquidWindow-master-Bridging-header.pch",
+    "swift-dependencies" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/LiquidWindow-master.swiftdeps"
+  },
+  "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/Sources/AccessibilityHelper.swift" : {
+    "index-unit-output-path" : "/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/AccessibilityHelper.o",
+    "llvm-bc" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/AccessibilityHelper.bc",
+    "object" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/AccessibilityHelper.o"
+  },
+  "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/Sources/HotKeyManager.swift" : {
+    "index-unit-output-path" : "/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/HotKeyManager.o",
+    "llvm-bc" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/HotKeyManager.bc",
+    "object" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/HotKeyManager.o"
+  },
+  "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/Sources/LiquidWindowApp.swift" : {
+    "index-unit-output-path" : "/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/LiquidWindowApp.o",
+    "llvm-bc" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/LiquidWindowApp.bc",
+    "object" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/LiquidWindowApp.o"
+  },
+  "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/Sources/WindowManager.swift" : {
+    "index-unit-output-path" : "/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/WindowManager.o",
+    "llvm-bc" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/WindowManager.bc",
+    "object" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/WindowManager.o"
+  },
+  "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "index-unit-output-path" : "/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/kenefe/LOCAL/momo-agent/LiquidWindow/build/Build/Intermediates.noindex/LiquidWindow.build/Release/LiquidWindow.build/Objects-normal/arm64/GeneratedAssetSymbols.o"
+  }
+}

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiquidWindow — macOS 窗口管理</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0b;--surface:#141416;--border:#222225;
+  --text:#e8e8ec;--dim:#6e6e7a;--accent:#5b8af5;
+  --glass:rgba(255,255,255,.04);
+  --radius:12px;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,sans-serif;
+  background:var(--bg);color:var(--text);
+  line-height:1.6;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── Layout ── */
+.container{max-width:960px;margin:0 auto;padding:0 24px}
+
+/* ── Hero ── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;position:relative;
+  padding:80px 24px 60px;
+}
+.hero::before{
+  content:'';position:absolute;top:-120px;left:50%;
+  transform:translateX(-50%);
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(91,138,245,.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+.logo{
+  width:72px;height:72px;border-radius:18px;
+  background:linear-gradient(135deg,#1a1a1e,#2a2a30);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:32px;position:relative;
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+}
+.logo svg{width:36px;height:36px}
+h1{
+  font-size:clamp(2.4rem,5vw,3.6rem);font-weight:700;
+  letter-spacing:-.03em;line-height:1.1;
+  margin-bottom:16px;
+}
+h1 span{
+  background:linear-gradient(135deg,var(--accent),#8bb4ff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.tagline{
+  font-size:clamp(1rem,2vw,1.2rem);color:var(--dim);
+  max-width:480px;margin-bottom:40px;font-weight:400;
+}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 28px;border-radius:10px;font-size:.95rem;
+  font-weight:500;text-decoration:none;transition:all .2s;
+  cursor:pointer;border:none;font-family:inherit;
+}
+.btn-primary{
+  background:var(--accent);color:#fff;
+  box-shadow:0 2px 12px rgba(91,138,245,.25);
+}
+.btn-primary:hover{background:#4a7be8;transform:translateY(-1px);box-shadow:0 4px 20px rgba(91,138,245,.35)}
+.btn-ghost{
+  background:var(--glass);color:var(--text);
+  border:1px solid var(--border);
+}
+.btn-ghost:hover{border-color:#3a3a40;background:rgba(255,255,255,.06)}
+.btn svg{width:18px;height:18px}
+.size-badge{
+  display:inline-block;margin-top:20px;
+  font-size:.8rem;color:var(--dim);
+  padding:4px 12px;border-radius:20px;
+  background:var(--glass);border:1px solid var(--border);
+}
+
+/* ── Demo Section ── */
+.demo-section{
+  padding:80px 24px 100px;
+}
+.section-label{
+  text-align:center;font-size:.8rem;text-transform:uppercase;
+  letter-spacing:.12em;color:var(--dim);margin-bottom:12px;
+}
+.section-title{
+  text-align:center;font-size:clamp(1.5rem,3vw,2rem);
+  font-weight:600;letter-spacing:-.02em;margin-bottom:48px;
+}
+
+/* ── Desktop mockup ── */
+.desktop-wrapper{
+  max-width:720px;margin:0 auto;
+  perspective:1200px;
+}
+.desktop{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+.titlebar{
+  height:36px;background:#1a1a1e;
+  display:flex;align-items:center;padding:0 14px;
+  border-bottom:1px solid var(--border);gap:7px;
+}
+.titlebar-dot{width:10px;height:10px;border-radius:50%;background:#333}
+.titlebar-dot:nth-child(1){background:#ff5f57}
+.titlebar-dot:nth-child(2){background:#febc2e}
+.titlebar-dot:nth-child(3){background:#28c840}
+.titlebar-title{
+  flex:1;text-align:center;font-size:.72rem;
+  color:var(--dim);letter-spacing:.02em;
+}
+.screen{
+  position:relative;aspect-ratio:16/10;
+  background:#0d0d0f;overflow:hidden;
+}
+/* Grid lines */
+.screen::before{
+  content:'';position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(90deg,transparent,transparent calc(33.333% - .5px),rgba(255,255,255,.03) calc(33.333% - .5px),rgba(255,255,255,.03) calc(33.333% + .5px))
+    ,repeating-linear-gradient(0deg,transparent,transparent calc(50% - .5px),rgba(255,255,255,.03) calc(50% - .5px),rgba(255,255,255,.03) calc(50% + .5px));
+  pointer-events:none;z-index:1;
+}
+/* The window */
+.win{
+  position:absolute;
+  background:linear-gradient(180deg,#1e2028,#181a20);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;
+  transition:all .5s cubic-bezier(.4,.0,.2,1);
+  z-index:2;overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.5);
+}
+.win-bar{
+  height:22px;background:rgba(255,255,255,.04);
+  display:flex;align-items:center;padding:0 8px;gap:4px;
+}
+.win-bar i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15)}
+.win-body{padding:10px}
+.win-line{
+  height:4px;border-radius:2px;margin-bottom:6px;
+  background:rgba(255,255,255,.06);
+}
+.win-line:nth-child(1){width:60%}
+.win-line:nth-child(2){width:80%}
+.win-line:nth-child(3){width:45%}
+.win-line:nth-child(4){width:70%}
+.win-line:nth-child(5){width:55%}
+
+/* ── Controls ── */
+.controls{
+  display:flex;justify-content:center;gap:8px;
+  margin-top:32px;flex-wrap:wrap;
+}
+.key-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:8px;
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--dim);font-size:.82rem;cursor:pointer;
+  transition:all .15s;font-family:inherit;
+  user-select:none;
+}
+.key-btn:hover,.key-btn.active{
+  border-color:var(--accent);color:var(--text);
+  background:rgba(91,138,245,.06);
+}
+.key-btn kbd{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:22px;height:22px;padding:0 5px;
+  background:rgba(255,255,255,.06);border-radius:4px;
+  font-size:.72rem;font-family:inherit;
+  border:1px solid rgba(255,255,255,.08);
+}
+.key-btn .arrow{font-size:1rem;line-height:1}
+
+/* State label */
+.state-label{
+  text-align:center;margin-top:20px;
+  font-size:.85rem;color:var(--dim);
+  min-height:1.4em;
+  transition:opacity .2s;
+}
+.state-label span{
+  color:var(--accent);font-weight:500;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ── Features ── */
+.features{
+  padding:60px 24px 100px;
+}
+.features-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:16px;max-width:720px;margin:0 auto;
+}
+.feature{
+  padding:24px;border-radius:var(--radius);
+  background:var(--glass);border:1px solid var(--border);
+  transition:border-color .2s;
+}
+.feature:hover{border-color:#333}
+.feature-icon{
+  font-size:1.4rem;margin-bottom:12px;
+  display:block;
+}
+.feature h3{font-size:.9rem;font-weight:600;margin-bottom:6px}
+.feature p{font-size:.8rem;color:var(--dim);line-height:1.5}
+
+/* ── Shortcut table ── */
+.shortcuts{padding:0 24px 100px}
+.shortcut-list{
+  max-width:520px;margin:0 auto;
+  display:flex;flex-direction:column;gap:1px;
+  background:var(--border);border-radius:var(--radius);
+  overflow:hidden;
+}
+.shortcut-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;background:var(--surface);
+}
+.shortcut-keys{
+  display:flex;gap:4px;align-items:center;
+}
+.shortcut-keys kbd{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:28px;height:28px;padding:0 8px;
+  background:rgba(255,255,255,.06);border-radius:6px;
+  font-size:.78rem;font-family:inherit;color:var(--text);
+  border:1px solid rgba(255,255,255,.08);
+}
+.shortcut-desc{font-size:.85rem;color:var(--dim)}
+
+/* ── Footer ── */
+footer{
+  text-align:center;padding:40px 24px;
+  border-top:1px solid var(--border);
+  font-size:.8rem;color:var(--dim);
+}
+footer a{color:var(--dim);text-decoration:none}
+footer a:hover{color:var(--text)}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  .features-grid{grid-template-columns:1fr}
+  .hero{padding:60px 20px 40px}
+  .controls{gap:6px}
+  .key-btn{padding:6px 12px;font-size:.78rem}
+  .shortcut-desc{font-size:.78rem}
+}
+
+/* ── Keyboard hint ── */
+.kb-hint{
+  text-align:center;margin-top:12px;
+  font-size:.75rem;color:rgba(255,255,255,.2);
+}
+@media(pointer:coarse){.kb-hint{display:none}}
+
+/* ── Animations ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.hero>*{animation:fadeUp .6s ease both}
+.hero>*:nth-child(2){animation-delay:.1s}
+.hero>*:nth-child(3){animation-delay:.2s}
+.hero>*:nth-child(4){animation-delay:.3s}
+.hero>*:nth-child(5){animation-delay:.4s}
+.hero>*:nth-child(6){animation-delay:.5s}
+</style>
+</head>
+<body>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="logo">
+    <svg viewBox="0 0 36 36" fill="none">
+      <rect x="3" y="6" width="18" height="24" rx="3" stroke="#5b8af5" stroke-width="1.5" opacity=".4"/>
+      <rect x="15" y="6" width="18" height="24" rx="3" stroke="#5b8af5" stroke-width="1.5" opacity=".7"/>
+      <rect x="6" y="8" width="24" height="20" rx="3" stroke="#8bb4ff" stroke-width="1.5"/>
+    </svg>
+  </div>
+  <h1>Liquid<span>Window</span></h1>
+  <p class="tagline">macOS 窗口管理，快捷键驱动，像水一样流动。</p>
+  <div class="hero-actions">
+    <a href="#" class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      下载
+    </a>
+    <a href="https://github.com/nicekid1/LiquidWindow" class="btn btn-ghost">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+  </div>
+  <div class="size-badge">仅 27 KB · macOS 14+</div>
+</section>
+
+<!-- ── Interactive Demo ── -->
+<section class="demo-section">
+  <p class="section-label">试试看</p>
+  <h2 class="section-title">点击按钮，或按键盘方向键</h2>
+  <div class="desktop-wrapper">
+    <div class="desktop">
+      <div class="titlebar">
+        <div class="titlebar-dot"></div>
+        <div class="titlebar-dot"></div>
+        <div class="titlebar-dot"></div>
+        <div class="titlebar-title">LiquidWindow Demo</div>
+      </div>
+      <div class="screen" id="screen">
+        <div class="win" id="win">
+          <div class="win-bar"><i></i><i></i><i></i></div>
+          <div class="win-body">
+            <div class="win-line"></div>
+            <div class="win-line"></div>
+            <div class="win-line"></div>
+            <div class="win-line"></div>
+            <div class="win-line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="controls">
+    <button class="key-btn" data-dir="left" aria-label="靠左">
+      <kbd>⌃⌘</kbd><span class="arrow">←</span>
+    </button>
+    <button class="key-btn" data-dir="down" aria-label="靠下">
+      <kbd>⌃⌘</kbd><span class="arrow">↓</span>
+    </button>
+    <button class="key-btn" data-dir="up" aria-label="靠上">
+      <kbd>⌃⌘</kbd><span class="arrow">↑</span>
+    </button>
+    <button class="key-btn" data-dir="right" aria-label="靠右">
+      <kbd>⌃⌘</kbd><span class="arrow">→</span>
+    </button>
+  </div>
+  <div class="state-label" id="stateLabel"></div>
+  <p class="kb-hint">也可以直接按键盘方向键体验</p>
+</section>
+
+<!-- ── Features ── -->
+<section class="features">
+  <p class="section-label">为什么选择</p>
+  <h2 class="section-title">少即是多</h2>
+  <div class="features-grid">
+    <div class="feature">
+      <span class="feature-icon">⌨️</span>
+      <h3>快捷键驱动</h3>
+      <p>四个方向键，覆盖所有布局。不需要记复杂的组合键。</p>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">🪶</span>
+      <h3>27 KB</h3>
+      <p>没有 Electron，没有臃肿依赖。原生 Swift，极致轻量。</p>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">💧</span>
+      <h3>流畅动画</h3>
+      <p>窗口像水一样流动到目标位置。可在菜单栏一键关闭动画。</p>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">🧠</span>
+      <h3>智能方向</h3>
+      <p>反方向按键先扩展再切换，符合直觉的交互逻辑。</p>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">🖥️</span>
+      <h3>菜单栏常驻</h3>
+      <p>安静地待在菜单栏，需要时随时可用，不打扰工作流。</p>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">🔒</span>
+      <h3>隐私安全</h3>
+      <p>不联网，不收集数据。仅需辅助功能权限来移动窗口。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Shortcuts ── -->
+<section class="shortcuts">
+  <p class="section-label">快捷键</p>
+  <h2 class="section-title">四个方向，所有布局</h2>
+  <div class="shortcut-list">
+    <div class="shortcut-row">
+      <div class="shortcut-keys"><kbd>⌃</kbd><kbd>⌘</kbd><kbd>←</kbd></div>
+      <span class="shortcut-desc">靠左 · 全屏→⅔→½→⅓</span>
+    </div>
+    <div class="shortcut-row">
+      <div class="shortcut-keys"><kbd>⌃</kbd><kbd>⌘</kbd><kbd>→</kbd></div>
+      <span class="shortcut-desc">靠右 · 全屏→⅔→½→⅓</span>
+    </div>
+    <div class="shortcut-row">
+      <div class="shortcut-keys"><kbd>⌃</kbd><kbd>⌘</kbd><kbd>↑</kbd></div>
+      <span class="shortcut-desc">靠上 · 全屏↔½</span>
+    </div>
+    <div class="shortcut-row">
+      <div class="shortcut-keys"><kbd>⌃</kbd><kbd>⌘</kbd><kbd>↓</kbd></div>
+      <span class="shortcut-desc">靠下 · 全屏↔½</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <p>LiquidWindow · 由 <a href="https://github.com/nicekid1">kenefe</a> 制作</p>
+</footer>
+
+<script>
+(function(){
+  // ── Window state machine ──
+  // Horizontal sizes: 1=full, 2/3, 1/2, 1/3
+  // Vertical sizes: 1=full, 1/2
+  const H_SIZES = [1, 2/3, 1/2, 1/3];
+  const V_SIZES = [1, 1/2];
+
+  let hIndex = 0;   // index into H_SIZES
+  let vIndex = 0;   // index into V_SIZES
+  let side = 'left'; // 'left' or 'right'
+  let vSide = 'top'; // 'top' or 'bottom'
+
+  const win = document.getElementById('win');
+  const label = document.getElementById('stateLabel');
+  const buttons = document.querySelectorAll('.key-btn');
+
+  function fractionLabel(v) {
+    if (v === 1) return '全屏';
+    if (Math.abs(v - 2/3) < 0.01) return '⅔';
+    if (Math.abs(v - 1/2) < 0.01) return '½';
+    if (Math.abs(v - 1/3) < 0.01) return '⅓';
+    return Math.round(v * 100) + '%';
+  }
+
+  function updateWin() {
+    const w = H_SIZES[hIndex];
+    const h = V_SIZES[vIndex];
+    const x = side === 'left' ? 0 : (1 - w);
+    const y = vSide === 'top' ? 0 : (1 - h);
+
+    win.style.left = (x * 100) + '%';
+    win.style.top = (y * 100) + '%';
+    win.style.width = (w * 100) + '%';
+    win.style.height = (h * 100) + '%';
+
+    // Build label
+    const parts = [];
+    if (w < 1) parts.push(side === 'left' ? '靠左' : '靠右');
+    if (h < 1) parts.push(vSide === 'top' ? '靠上' : '靠下');
+    if (w === 1 && h === 1) parts.push('全屏');
+
+    const dims = [];
+    dims.push('宽 <span>' + fractionLabel(w) + '</span>');
+    if (h < 1) dims.push('高 <span>' + fractionLabel(h) + '</span>');
+
+    label.innerHTML = parts.join(' · ') + ' — ' + dims.join(' · ');
+  }
+
+  function pressDir(dir) {
+    // Highlight button
+    buttons.forEach(b => {
+      b.classList.toggle('active', b.dataset.dir === dir);
+      if (b.dataset.dir === dir) {
+        setTimeout(() => b.classList.remove('active'), 300);
+      }
+    });
+
+    if (dir === 'left') {
+      if (side === 'right') {
+        // Opposite direction: expand first, then switch
+        if (hIndex > 0) {
+          hIndex--;
+        } else {
+          side = 'left';
+          hIndex = 1; // start at 2/3
+        }
+      } else {
+        side = 'left';
+        if (hIndex < H_SIZES.length - 1) {
+          hIndex++;
+        }
+        // At narrowest, stop (no cycle)
+      }
+    } else if (dir === 'right') {
+      if (side === 'left' && hIndex > 0) {
+        // Opposite: expand first
+        if (hIndex > 0) {
+          hIndex--;
+        }
+        if (hIndex === 0) {
+          // Back to full, now switch
+        }
+      } else if (side === 'left' && hIndex === 0) {
+        side = 'right';
+        hIndex = 1;
+      } else {
+        side = 'right';
+        if (hIndex < H_SIZES.length - 1) {
+          hIndex++;
+        }
+      }
+    } else if (dir === 'up') {
+      if (vSide === 'bottom') {
+        if (vIndex > 0) {
+          vIndex--;
+        } else {
+          vSide = 'top';
+          vIndex = 1;
+        }
+      } else {
+        vSide = 'top';
+        if (vIndex === 0) vIndex = 1;
+        else vIndex = 0;
+      }
+    } else if (dir === 'down') {
+      if (vSide === 'top' && vIndex > 0) {
+        vIndex--;
+        if (vIndex === 0) {
+          // full height
+        }
+      } else if (vSide === 'top' && vIndex === 0) {
+        vSide = 'bottom';
+        vIndex = 1;
+      } else {
+        vSide = 'bottom';
+        if (vIndex === 0) vIndex = 1;
+        else vIndex = 0;
+      }
+    }
+
+    updateWin();
+  }
+
+  // Button clicks
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => pressDir(btn.dataset.dir));
+  });
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    const map = { ArrowLeft:'left', ArrowRight:'right', ArrowUp:'up', ArrowDown:'down' };
+    if (map[e.key]) {
+      e.preventDefault();
+      pressDir(map[e.key]);
+    }
+  });
+
+  // Initial state
+  updateWin();
+
+  // ── Auto-play on load ──
+  const sequence = ['left','left','left','right','right','right','right','down','up'];
+  let i = 0;
+  const autoTimer = setInterval(() => {
+    if (i >= sequence.length) { clearInterval(autoTimer); return; }
+    pressDir(sequence[i]);
+    i++;
+  }, 900);
+
+  // Stop auto-play on any interaction
+  function stopAuto() {
+    clearInterval(autoTimer);
+    document.removeEventListener('click', stopAuto);
+    document.removeEventListener('keydown', stopAuto);
+  }
+  document.addEventListener('click', stopAuto, { once: true });
+  document.addEventListener('keydown', stopAuto, { once: true });
+})();
+</script>
+</body>
+</html>
