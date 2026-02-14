@@ -24,14 +24,28 @@ class WindowManager {
 
     private init() {}
 
-    // MARK: - 获取屏幕可用区域（AX 坐标系：y=0 在屏幕最顶部）
-    private func getUsableFrame() -> CGRect? {
-        guard let screen = NSScreen.main else { return nil }
-        let full = screen.frame          // 整个屏幕
-        let visible = screen.visibleFrame // 排除菜单栏和 Dock
-
-        // 转成 AX 坐标系（y 从顶部算）
-        let axY = full.height - visible.origin.y - visible.height
+    // MARK: - 获取窗口所在屏幕的可用区域（AX 坐标系：y=0 在主屏顶部）
+    private func getUsableFrame(for window: AXUIElement) -> CGRect? {
+        // 找到窗口所在的屏幕
+        let screen: NSScreen
+        if let windowFrame = getWindowFrame(window) {
+            // 窗口中心点在 AX 坐标系，转成 NSScreen 坐标系来匹配
+            let primaryHeight = NSScreen.screens.first?.frame.height ?? 0
+            let nsCenterX = windowFrame.midX
+            let nsCenterY = primaryHeight - windowFrame.midY
+            let nsPoint = NSPoint(x: nsCenterX, y: nsCenterY)
+            
+            // 找包含窗口中心点的屏幕
+            screen = NSScreen.screens.first(where: { $0.frame.contains(nsPoint) }) ?? NSScreen.main ?? NSScreen.screens[0]
+        } else {
+            screen = NSScreen.main ?? NSScreen.screens[0]
+        }
+        
+        let primaryHeight = NSScreen.screens.first?.frame.height ?? screen.frame.height
+        let visible = screen.visibleFrame
+        
+        // NSScreen 坐标转 AX 坐标（AX 的 y=0 在主屏顶部）
+        let axY = primaryHeight - visible.origin.y - visible.height
         return CGRect(x: visible.origin.x, y: axY, width: visible.width, height: visible.height)
     }
 
@@ -39,7 +53,7 @@ class WindowManager {
 
     func moveLeft() {
         guard let (window, pid) = getFocusedWindow(),
-              let area = getUsableFrame() else { return }
+              let area = getUsableFrame(for: window) else { return }
         checkAndResetState(pid: pid)
 
         switch hSide {
@@ -56,7 +70,7 @@ class WindowManager {
 
     func moveRight() {
         guard let (window, pid) = getFocusedWindow(),
-              let area = getUsableFrame() else { return }
+              let area = getUsableFrame(for: window) else { return }
         checkAndResetState(pid: pid)
 
         switch hSide {
@@ -73,7 +87,7 @@ class WindowManager {
 
     func moveUp() {
         guard let (window, pid) = getFocusedWindow(),
-              let area = getUsableFrame() else { return }
+              let area = getUsableFrame(for: window) else { return }
         checkAndResetState(pid: pid)
 
         switch vSide {
@@ -90,7 +104,7 @@ class WindowManager {
 
     func moveDown() {
         guard let (window, pid) = getFocusedWindow(),
-              let area = getUsableFrame() else { return }
+              let area = getUsableFrame(for: window) else { return }
         checkAndResetState(pid: pid)
 
         switch vSide {
